@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { deleteDoc, doc, getDoc } from 'firebase/firestore'
 import db from '../db';
+import firebase from 'firebase/compat/app';
 
 export default function JournalEntry() {
     const { id } = useParams();
@@ -9,12 +10,30 @@ export default function JournalEntry() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
-    const [entry, setEntry] = useState(undefined);
+    const [entry, setEntry] = useState([]);
+    const [user, setUser] = useState({});
+
+    useEffect(() => {
+        const unregisteredAuthObserver = firebase.auth().onAuthStateChanged(user => {
+            setUser(user)
+        })
+
+        return () => unregisteredAuthObserver(); // return this way if its a continuous check
+                                                 // 
+    }, [user.uid])
+
 
     // anytime {id} changes, want useEffect to show changes
     // we calling useEffect every time {id} changes
     useEffect(() => {
-        const entryRef = doc(db, 'journal-entries', id)
+        // const userId = 'tEGimNXxSSjYFBL7NNek';
+        // this is to check if user.uid exists before running
+        // after uid is gotten from firebase, it will run or else it will do nothing useful
+        if (!user.uid) {
+            return;
+        }
+
+        const entryRef = doc(db, 'users', user.uid, 'journal-entries', id)
         getDoc(entryRef).then(docSnap => {
             setIsLoading(false);
 
@@ -29,7 +48,7 @@ export default function JournalEntry() {
             }
         });
 
-    }, [id])
+    }, [user.uid])
 
     if (isLoading) {
         <p>Loading...</p>
