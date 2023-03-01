@@ -36,8 +36,11 @@ export default function Journal() {
         //     }
         // ); 
         
+        const userId = 'tEGimNXxSSjYFBL7NNek';
         const entriesQuery = query(
-            collection(db, 'journal-entries'),
+            // collection(db, 'journal-entries'),
+            // collection(db, `users/${userId}/journal-entries`),
+            collection(db, 'users', userId, 'journal-entries'),
             orderBy('createdAt', 'desc')
         )
         // important: the docs have a certain way of wanting you to do things
